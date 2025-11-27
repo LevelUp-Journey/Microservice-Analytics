@@ -466,6 +466,111 @@
                     }
                 }
             }
+        },
+        "/api/v1/user-registration-analytics/kpi/total-users": {
+            "get": {
+                "description": "Obtiene el número total de usuarios registrados en el sistema",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User Registration Analytics"
+                ],
+                "summary": "Obtener total de usuarios registrados",
+                "responses": {
+                    "200": {
+                        "description": "Total de usuarios",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/user-registration-analytics/sync": {
+            "post": {
+                "description": "Lee todos los mensajes disponibles del tópico community.registration y los guarda en la base de datos",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User Registration Analytics"
+                ],
+                "summary": "Sincronizar eventos de registro de usuarios desde Kafka",
+                "responses": {
+                    "200": {
+                        "description": "Resultado de la sincronización",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/user-registration-analytics/user/{userId}": {
+            "get": {
+                "description": "Obtiene el análisis de registro de un usuario específico por su ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User Registration Analytics"
+                ],
+                "summary": "Obtener analytics por ID de usuario",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID del usuario (UUID)",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Datos del registro del usuario",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Solicitud inválida",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Usuario no encontrado",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {

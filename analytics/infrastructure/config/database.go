@@ -23,6 +23,7 @@ func NewDatabase(dsn string) (*gorm.DB, error) {
 	if err := db.AutoMigrate(
 		&repositories.ExecutionAnalyticsModel{},
 		&repositories.TestResultModel{},
+		&repositories.UserRegistrationAnalyticsModel{},
 	); err != nil {
 		return nil, fmt.Errorf("failed to migrate database: %w", err)
 	}

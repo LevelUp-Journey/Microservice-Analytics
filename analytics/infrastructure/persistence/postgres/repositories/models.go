@@ -46,3 +46,20 @@ type TestResultModel struct {
 func (TestResultModel) TableName() string {
 	return "test_results"
 }
+
+// UserRegistrationAnalyticsModel es el modelo GORM para persistencia de registros de usuarios en la comunidad
+type UserRegistrationAnalyticsModel struct {
+	ID           uint       `gorm:"primaryKey"`
+	UserID       string     `gorm:"uniqueIndex;not null;type:uuid"`
+	ProfileID    string     `gorm:"index;not null;type:uuid"`
+	Username     string     `gorm:"index;not null"`
+	ProfileURL   *string    `gorm:"type:text"`
+	RegisteredAt time.Time  `gorm:"index;not null"`
+	CreatedAt    time.Time  `gorm:"autoCreateTime"`
+	UpdatedAt    time.Time  `gorm:"autoUpdateTime"`
+}
+
+// TableName especifica el nombre de la tabla
+func (UserRegistrationAnalyticsModel) TableName() string {
+	return "user_registration_analytics"
+}

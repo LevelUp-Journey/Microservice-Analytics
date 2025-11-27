@@ -30,3 +30,12 @@ type TestResultEvent struct {
 	Passed       bool   `json:"passed"`
 	ErrorMessage string `json:"error_message"`
 }
+
+// UserRegisteredEvent representa el evento community.registration recibido de Kafka
+type UserRegisteredEvent struct {
+	UserID     string  `json:"userId"`
+	ProfileID  string  `json:"profileId"`
+	Username   string  `json:"username"`
+	ProfileURL *string `json:"profileUrl"`
+	OccurredOn []int   `json:"occurredOn"` // [year, month, day, hour, minute, second, nano]
+}

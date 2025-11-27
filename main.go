@@ -50,16 +50,26 @@ func main() {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	// Crear repositorio
-	repository := repositories.NewPostgresExecutionAnalyticsRepository(db)
+	// Crear repositorios
+	executionRepository := repositories.NewPostgresExecutionAnalyticsRepository(db)
+	userRegistrationRepository := repositories.NewPostgresUserRegistrationAnalyticsRepository(db)
 
-	// Crear servicios
-	commandService := commandservices.NewExecutionAnalyticsCommandService(repository)
-	queryService := queryservices.NewExecutionAnalyticsQueryService(repository)
-	syncService := commandservices.NewSyncService(
+	// Crear servicios de ejecución de código
+	executionCommandService := commandservices.NewExecutionAnalyticsCommandService(executionRepository)
+	executionQueryService := queryservices.NewExecutionAnalyticsQueryService(executionRepository)
+	executionSyncService := commandservices.NewSyncService(
 		cfg.Kafka.BootstrapServers,
 		cfg.Kafka.Topic,
-		repository,
+		executionRepository,
+	)
+
+	// Crear servicios de registro de usuarios
+	userRegistrationCommandService := commandservices.NewUserRegistrationAnalyticsCommandService(userRegistrationRepository)
+	userRegistrationQueryService := queryservices.NewUserRegistrationAnalyticsQueryService(userRegistrationRepository)
+	userRegistrationSyncService := commandservices.NewUserRegistrationSyncService(
+		cfg.Kafka.BootstrapServers,
+		cfg.KafkaUserRegistration.Topic,
+		userRegistrationRepository,
 	)
 
 	// Configurar Gin
@@ -97,11 +107,20 @@ func main() {
 
 	// Registrar rutas de API
 	apiV1 := router.Group("/api/v1")
-	analyticsController := controllers.NewAnalyticsController(queryService)
+
+	// Controladores de ejecución de código
+	analyticsController := controllers.NewAnalyticsController(executionQueryService)
 	analyticsController.RegisterRoutes(apiV1)
 
-	syncController := controllers.NewSyncController(syncService)
+	syncController := controllers.NewSyncController(executionSyncService)
 	syncController.RegisterRoutes(apiV1)
+
+	// Controladores de registro de usuarios
+	userRegistrationController := controllers.NewUserRegistrationAnalyticsController(
+		userRegistrationQueryService,
+		userRegistrationSyncService,
+	)
+	userRegistrationController.RegisterRoutes(apiV1)
 
 	// Iniciar servidor HTTP en goroutine
 	srv := &http.Server{
@@ -134,24 +153,44 @@ func main() {
 		}
 	}
 
-	// Iniciar consumidor de Kafka
-	consumer, err := kafka.NewConsumer(
+	// Iniciar consumidor de Kafka para ejecuciones de código
+	executionConsumer, err := kafka.NewConsumer(
 		cfg.Kafka.BootstrapServers,
 		cfg.Kafka.GroupID,
 		cfg.Kafka.Topic,
-		commandService,
+		executionCommandService,
 	)
 	if err != nil {
-		log.Fatalf("Failed to create Kafka consumer: %v", err)
+		log.Fatalf("Failed to create execution Kafka consumer: %v", err)
+	}
+
+	// Iniciar consumidor de Kafka para registros de usuarios
+	userRegistrationConsumer, err := kafka.NewUserRegistrationConsumer(
+		cfg.Kafka.BootstrapServers,
+		cfg.KafkaUserRegistration.GroupID,
+		cfg.KafkaUserRegistration.Topic,
+		userRegistrationCommandService,
+	)
+	if err != nil {
+		log.Fatalf("Failed to create user registration Kafka consumer: %v", err)
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	// Iniciar consumidor de ejecuciones
 	go func() {
 		log.Printf("Starting Kafka consumer for topic: %s", cfg.Kafka.Topic)
-		if err := consumer.Start(ctx); err != nil {
-			log.Printf("Kafka consumer error: %v", err)
+		if err := executionConsumer.Start(ctx); err != nil {
+			log.Printf("Execution Kafka consumer error: %v", err)
+		}
+	}()
+
+	// Iniciar consumidor de registros de usuarios
+	go func() {
+		log.Printf("Starting Kafka consumer for user registrations on topic: %s", cfg.KafkaUserRegistration.Topic)
+		if err := userRegistrationConsumer.Start(ctx); err != nil {
+			log.Printf("User registration Kafka consumer error: %v", err)
 		}
 	}()
 
@@ -169,10 +208,13 @@ func main() {
 		}
 	}
 
-	// Detener consumidor de Kafka
+	// Detener consumidores de Kafka
 	cancel()
-	if err := consumer.Close(); err != nil {
-		log.Printf("Error closing Kafka consumer: %v", err)
+	if err := executionConsumer.Close(); err != nil {
+		log.Printf("Error closing execution Kafka consumer: %v", err)
+	}
+	if err := userRegistrationConsumer.Close(); err != nil {
+		log.Printf("Error closing user registration Kafka consumer: %v", err)
 	}
 
 	// Detener servidor HTTP

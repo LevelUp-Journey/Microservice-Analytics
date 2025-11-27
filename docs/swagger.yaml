@@ -327,6 +327,78 @@ paths:
       summary: Sincronizar eventos de Kafka
       tags:
       - Sync
+  /api/v1/user-registration-analytics/kpi/total-users:
+    get:
+      consumes:
+      - application/json
+      description: Obtiene el número total de usuarios registrados en el sistema
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Total de usuarios
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+      summary: Obtener total de usuarios registrados
+      tags:
+      - User Registration Analytics
+  /api/v1/user-registration-analytics/sync:
+    post:
+      consumes:
+      - application/json
+      description: Lee todos los mensajes disponibles del tópico community.registration
+        y los guarda en la base de datos
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Resultado de la sincronización
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+      summary: Sincronizar eventos de registro de usuarios desde Kafka
+      tags:
+      - User Registration Analytics
+  /api/v1/user-registration-analytics/user/{userId}:
+    get:
+      consumes:
+      - application/json
+      description: Obtiene el análisis de registro de un usuario específico por su
+        ID
+      parameters:
+      - description: ID del usuario (UUID)
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Datos del registro del usuario
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Solicitud inválida
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+        "404":
+          description: Usuario no encontrado
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+      summary: Obtener analytics por ID de usuario
+      tags:
+      - User Registration Analytics
 schemes:
 - http
 - https

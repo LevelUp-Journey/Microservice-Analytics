@@ -1,0 +1,222 @@
+basePath: /api/v1
+definitions:
+  controllers.ErrorResponse:
+    properties:
+      code:
+        type: integer
+      error:
+        type: string
+      message:
+        type: string
+    type: object
+host: localhost:8291
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: Microservicio de análisis de ejecuciones de código con arquitectura
+    DDD
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Analytics Microservice API
+  version: "1.0"
+paths:
+  /analytics/execution/{executionId}:
+    get:
+      consumes:
+      - application/json
+      description: Obtiene el análisis completo de una ejecución específica por su
+        ID
+      parameters:
+      - description: ID de la ejecución
+        in: path
+        name: executionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+      summary: Obtener analytics por ID de ejecución
+      tags:
+      - Analytics
+  /analytics/kpi/challenge/{challengeId}:
+    get:
+      consumes:
+      - application/json
+      description: Obtiene las métricas clave de rendimiento de un challenge específico
+      parameters:
+      - description: ID del challenge
+        in: path
+        name: challengeId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+      summary: Obtener KPIs de un challenge
+      tags:
+      - KPI
+  /analytics/kpi/daily:
+    get:
+      consumes:
+      - application/json
+      description: Obtiene las métricas agregadas por día
+      parameters:
+      - default: 30
+        description: Límite de resultados
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+      summary: Obtener KPIs diarios
+      tags:
+      - KPI
+  /analytics/kpi/languages:
+    get:
+      consumes:
+      - application/json
+      description: Obtiene las métricas agregadas por lenguaje de programación
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+      summary: Obtener KPIs por lenguaje de programación
+      tags:
+      - KPI
+  /analytics/kpi/top-failed-challenges:
+    get:
+      consumes:
+      - application/json
+      description: Obtiene los challenges que tienen mayor cantidad de ejecuciones
+        fallidas
+      parameters:
+      - default: 10
+        description: Límite de resultados
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+      summary: Obtener top challenges con más fallos
+      tags:
+      - KPI
+  /analytics/student/{studentId}:
+    get:
+      consumes:
+      - application/json
+      description: Obtiene todos los análisis de ejecuciones de un estudiante específico
+      parameters:
+      - description: ID del estudiante
+        in: path
+        name: studentId
+        required: true
+        type: string
+      - default: 1
+        description: Número de página
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Tamaño de página
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+      summary: Obtener analytics por ID de estudiante
+      tags:
+      - Analytics
+  /sync/events:
+    post:
+      consumes:
+      - application/json
+      description: Obtiene todos los eventos del tópico execution.analytics de Kafka
+        y los guarda en la base de datos
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+      summary: Sincronizar eventos de Kafka
+      tags:
+      - Sync
+swagger: "2.0"

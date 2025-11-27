@@ -59,7 +59,7 @@ type ErrorResponse struct {
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
-// @Router /analytics/execution/{executionId} [get]
+// @Router /api/v1/analytics/execution/{executionId} [get]
 func (c *AnalyticsController) GetByExecutionID(ctx *gin.Context) {
 	executionID := ctx.Param("executionId")
 
@@ -127,7 +127,7 @@ func (c *AnalyticsController) GetByExecutionID(ctx *gin.Context) {
 // @Param pageSize query int false "Tamaño de página" default(20)
 // @Success 200 {array} map[string]interface{}
 // @Failure 400 {object} ErrorResponse
-// @Router /analytics/student/{studentId} [get]
+// @Router /api/v1/analytics/student/{studentId} [get]
 func (c *AnalyticsController) GetByStudentID(ctx *gin.Context) {
 	studentID := ctx.Param("studentId")
 	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
@@ -168,6 +168,18 @@ func (c *AnalyticsController) GetByStudentID(ctx *gin.Context) {
 	})
 }
 
+// GetByChallengeID obtiene todas las ejecuciones de un challenge
+// @Summary Obtener analytics por ID de challenge
+// @Description Obtiene todos los análisis de ejecuciones de un challenge específico
+// @Tags Analytics
+// @Accept json
+// @Produce json
+// @Param challengeId path string true "ID del challenge"
+// @Param page query int false "Número de página" default(1)
+// @Param pageSize query int false "Tamaño de página" default(20)
+// @Success 200 {array} map[string]interface{}
+// @Failure 400 {object} ErrorResponse
+// @Router /api/v1/analytics/challenge/{challengeId} [get]
 func (c *AnalyticsController) GetByChallengeID(ctx *gin.Context) {
 	challengeID := ctx.Param("challengeId")
 	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
@@ -208,6 +220,19 @@ func (c *AnalyticsController) GetByChallengeID(ctx *gin.Context) {
 	})
 }
 
+// GetByDateRange obtiene ejecuciones en un rango de fechas
+// @Summary Obtener analytics por rango de fechas
+// @Description Obtiene todos los análisis de ejecuciones en un rango de fechas específico
+// @Tags Analytics
+// @Accept json
+// @Produce json
+// @Param startDate query string true "Fecha de inicio (RFC3339)"
+// @Param endDate query string true "Fecha de fin (RFC3339)"
+// @Param page query int false "Número de página" default(1)
+// @Param pageSize query int false "Tamaño de página" default(20)
+// @Success 200 {array} map[string]interface{}
+// @Failure 400 {object} ErrorResponse
+// @Router /api/v1/analytics/date-range [get]
 func (c *AnalyticsController) GetByDateRange(ctx *gin.Context) {
 	startDateStr := ctx.Query("startDate")
 	endDateStr := ctx.Query("endDate")
@@ -265,6 +290,16 @@ func (c *AnalyticsController) GetByDateRange(ctx *gin.Context) {
 	})
 }
 
+// GetStudentKPI obtiene KPIs de un estudiante
+// @Summary Obtener KPIs de un estudiante
+// @Description Obtiene las métricas clave de rendimiento de un estudiante específico
+// @Tags KPI
+// @Accept json
+// @Produce json
+// @Param studentId path string true "ID del estudiante"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} ErrorResponse
+// @Router /api/v1/analytics/kpi/student/{studentId} [get]
 func (c *AnalyticsController) GetStudentKPI(ctx *gin.Context) {
 	studentID := ctx.Param("studentId")
 
@@ -304,7 +339,7 @@ func (c *AnalyticsController) GetStudentKPI(ctx *gin.Context) {
 // @Param challengeId path string true "ID del challenge"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} ErrorResponse
-// @Router /analytics/kpi/challenge/{challengeId} [get]
+// @Router /api/v1/analytics/kpi/challenge/{challengeId} [get]
 func (c *AnalyticsController) GetChallengeKPI(ctx *gin.Context) {
 	challengeID := ctx.Param("challengeId")
 
@@ -355,7 +390,7 @@ func (c *AnalyticsController) GetChallengeKPI(ctx *gin.Context) {
 // @Param limit query int false "Límite de resultados" default(30)
 // @Success 200 {array} map[string]interface{}
 // @Failure 500 {object} ErrorResponse
-// @Router /analytics/kpi/daily [get]
+// @Router /api/v1/analytics/kpi/daily [get]
 func (c *AnalyticsController) GetDailyKPI(ctx *gin.Context) {
 	endDate := time.Now()
 	startDate := endDate.AddDate(0, 0, -7)
@@ -407,7 +442,7 @@ func (c *AnalyticsController) GetDailyKPI(ctx *gin.Context) {
 // @Produce json
 // @Success 200 {array} map[string]interface{}
 // @Failure 500 {object} ErrorResponse
-// @Router /analytics/kpi/languages [get]
+// @Router /api/v1/analytics/kpi/languages [get]
 func (c *AnalyticsController) GetLanguageKPI(ctx *gin.Context) {
 	endDate := time.Now()
 	startDate := endDate.AddDate(0, 0, -30)
@@ -469,7 +504,7 @@ func (c *AnalyticsController) GetLanguageKPI(ctx *gin.Context) {
 // @Param limit query int false "Límite de resultados" default(10)
 // @Success 200 {array} map[string]interface{}
 // @Failure 500 {object} ErrorResponse
-// @Router /analytics/kpi/top-failed-challenges [get]
+// @Router /api/v1/analytics/kpi/top-failed-challenges [get]
 func (c *AnalyticsController) GetTopFailedChallenges(ctx *gin.Context) {
 	limit, _ := strconv.Atoi(ctx.DefaultQuery("limit", "10"))
 

@@ -24,7 +24,126 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/analytics/execution/{executionId}": {
+        "/api/v1/analytics/challenge/{challengeId}": {
+            "get": {
+                "description": "Obtiene todos los análisis de ejecuciones de un challenge específico",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Analytics"
+                ],
+                "summary": "Obtener analytics por ID de challenge",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID del challenge",
+                        "name": "challengeId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Número de página",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 20,
+                        "description": "Tamaño de página",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "additionalProperties": true
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/analytics/date-range": {
+            "get": {
+                "description": "Obtiene todos los análisis de ejecuciones en un rango de fechas específico",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Analytics"
+                ],
+                "summary": "Obtener analytics por rango de fechas",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Fecha de inicio (RFC3339)",
+                        "name": "startDate",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Fecha de fin (RFC3339)",
+                        "name": "endDate",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Número de página",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 20,
+                        "description": "Tamaño de página",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "additionalProperties": true
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/analytics/execution/{executionId}": {
             "get": {
                 "description": "Obtiene el análisis completo de una ejecución específica por su ID",
                 "consumes": [
@@ -69,7 +188,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/analytics/kpi/challenge/{challengeId}": {
+        "/api/v1/analytics/kpi/challenge/{challengeId}": {
             "get": {
                 "description": "Obtiene las métricas clave de rendimiento de un challenge específico",
                 "consumes": [
@@ -108,7 +227,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/analytics/kpi/daily": {
+        "/api/v1/analytics/kpi/daily": {
             "get": {
                 "description": "Obtiene las métricas agregadas por día",
                 "consumes": [
@@ -150,7 +269,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/analytics/kpi/languages": {
+        "/api/v1/analytics/kpi/languages": {
             "get": {
                 "description": "Obtiene las métricas agregadas por lenguaje de programación",
                 "consumes": [
@@ -183,7 +302,46 @@ const docTemplate = `{
                 }
             }
         },
-        "/analytics/kpi/top-failed-challenges": {
+        "/api/v1/analytics/kpi/student/{studentId}": {
+            "get": {
+                "description": "Obtiene las métricas clave de rendimiento de un estudiante específico",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "KPI"
+                ],
+                "summary": "Obtener KPIs de un estudiante",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID del estudiante",
+                        "name": "studentId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/analytics/kpi/top-failed-challenges": {
             "get": {
                 "description": "Obtiene los challenges que tienen mayor cantidad de ejecuciones fallidas",
                 "consumes": [
@@ -225,7 +383,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/analytics/student/{studentId}": {
+        "/api/v1/analytics/student/{studentId}": {
             "get": {
                 "description": "Obtiene todos los análisis de ejecuciones de un estudiante específico",
                 "consumes": [
@@ -281,7 +439,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/sync/events": {
+        "/api/v1/sync/events": {
             "post": {
                 "description": "Obtiene todos los eventos del tópico execution.analytics de Kafka y los guarda en la base de datos",
                 "consumes": [
@@ -333,8 +491,8 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8291",
-	BasePath:         "/api/v1",
+	Host:             "127.0.0.1:8291",
+	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Analytics Microservice API",
 	Description:      "Microservicio de análisis de ejecuciones de código con arquitectura DDD",

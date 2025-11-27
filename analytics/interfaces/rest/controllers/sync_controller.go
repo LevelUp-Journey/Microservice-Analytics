@@ -35,7 +35,7 @@ func (c *SyncController) RegisterRoutes(router *gin.RouterGroup) {
 // @Produce json
 // @Success 200 {object} map[string]interface{}
 // @Failure 500 {object} ErrorResponse
-// @Router /sync/events [post]
+// @Router /api/v1/sync/events [post]
 func (c *SyncController) SyncEvents(ctx *gin.Context) {
 	count, err := c.syncService.SyncAllEvents(ctx.Request.Context())
 	if err != nil {

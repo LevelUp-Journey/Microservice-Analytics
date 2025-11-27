@@ -1,4 +1,4 @@
-basePath: /api/v1
+basePath: /
 definitions:
   controllers.ErrorResponse:
     properties:
@@ -9,7 +9,7 @@ definitions:
       message:
         type: string
     type: object
-host: localhost:8291
+host: 127.0.0.1:8291
 info:
   contact:
     email: support@swagger.io
@@ -24,7 +24,89 @@ info:
   title: Analytics Microservice API
   version: "1.0"
 paths:
-  /analytics/execution/{executionId}:
+  /api/v1/analytics/challenge/{challengeId}:
+    get:
+      consumes:
+      - application/json
+      description: Obtiene todos los análisis de ejecuciones de un challenge específico
+      parameters:
+      - description: ID del challenge
+        in: path
+        name: challengeId
+        required: true
+        type: string
+      - default: 1
+        description: Número de página
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Tamaño de página
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+      summary: Obtener analytics por ID de challenge
+      tags:
+      - Analytics
+  /api/v1/analytics/date-range:
+    get:
+      consumes:
+      - application/json
+      description: Obtiene todos los análisis de ejecuciones en un rango de fechas
+        específico
+      parameters:
+      - description: Fecha de inicio (RFC3339)
+        in: query
+        name: startDate
+        required: true
+        type: string
+      - description: Fecha de fin (RFC3339)
+        in: query
+        name: endDate
+        required: true
+        type: string
+      - default: 1
+        description: Número de página
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Tamaño de página
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+      summary: Obtener analytics por rango de fechas
+      tags:
+      - Analytics
+  /api/v1/analytics/execution/{executionId}:
     get:
       consumes:
       - application/json
@@ -55,7 +137,7 @@ paths:
       summary: Obtener analytics por ID de ejecución
       tags:
       - Analytics
-  /analytics/kpi/challenge/{challengeId}:
+  /api/v1/analytics/kpi/challenge/{challengeId}:
     get:
       consumes:
       - application/json
@@ -81,7 +163,7 @@ paths:
       summary: Obtener KPIs de un challenge
       tags:
       - KPI
-  /analytics/kpi/daily:
+  /api/v1/analytics/kpi/daily:
     get:
       consumes:
       - application/json
@@ -109,7 +191,7 @@ paths:
       summary: Obtener KPIs diarios
       tags:
       - KPI
-  /analytics/kpi/languages:
+  /api/v1/analytics/kpi/languages:
     get:
       consumes:
       - application/json
@@ -131,7 +213,33 @@ paths:
       summary: Obtener KPIs por lenguaje de programación
       tags:
       - KPI
-  /analytics/kpi/top-failed-challenges:
+  /api/v1/analytics/kpi/student/{studentId}:
+    get:
+      consumes:
+      - application/json
+      description: Obtiene las métricas clave de rendimiento de un estudiante específico
+      parameters:
+      - description: ID del estudiante
+        in: path
+        name: studentId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controllers.ErrorResponse'
+      summary: Obtener KPIs de un estudiante
+      tags:
+      - KPI
+  /api/v1/analytics/kpi/top-failed-challenges:
     get:
       consumes:
       - application/json
@@ -160,7 +268,7 @@ paths:
       summary: Obtener top challenges con más fallos
       tags:
       - KPI
-  /analytics/student/{studentId}:
+  /api/v1/analytics/student/{studentId}:
     get:
       consumes:
       - application/json
@@ -198,7 +306,7 @@ paths:
       summary: Obtener analytics por ID de estudiante
       tags:
       - Analytics
-  /sync/events:
+  /api/v1/sync/events:
     post:
       consumes:
       - application/json

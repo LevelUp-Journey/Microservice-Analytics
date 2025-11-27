@@ -33,8 +33,8 @@ import (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host localhost:8291
-// @BasePath /api/v1
+// @host 127.0.0.1:8291
+// @BasePath /
 func main() {
 	// Cargar configuración
 	cfg, err := config.Load()
@@ -111,6 +111,7 @@ func main() {
 
 	go func() {
 		log.Printf("Starting HTTP server on %s", cfg.GetServerAddress())
+		log.Printf("Swagger UI available at: http://%s/swagger/index.html", cfg.GetServerAddress())
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("Failed to start server: %v", err)
 		}

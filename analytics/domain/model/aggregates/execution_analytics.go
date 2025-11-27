@@ -1,8 +1,8 @@
 package aggregates
 
 import (
-	"analytics/analytics/domain/model/entities"
-	"analytics/analytics/domain/model/valueobjects"
+	"github.com/nanab/analytics-service/analytics/domain/model/entities"
+	"github.com/nanab/analytics-service/analytics/domain/model/valueobjects"
 	"errors"
 	"time"
 )

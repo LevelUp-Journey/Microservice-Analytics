@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/joho/godotenv"
@@ -28,6 +29,13 @@ type Config struct {
 		GroupID          string
 		Topic            string
 		SecurityProtocol string
+		SaslMechanism    string
+		SaslUsername     string
+		SaslPassword     string
+		// Azure Event Hub specific settings
+		RequestTimeoutMs int
+		SessionTimeoutMs int
+		EnableAutoCommit bool
 	}
 	KafkaUserRegistration struct {
 		Topic   string
@@ -61,12 +69,27 @@ func Load() (*Config, error) {
 	config.Database.Name = getEnv("DB_NAME", "analytics_db")
 	config.Database.SSLMode = getEnv("DB_SSLMODE", "disable")
 
-	// Kafka configuration
+	// Kafka configuration - Compatible con Azure Event Hub
 	bootstrapServers := getEnv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
 	config.Kafka.BootstrapServers = strings.Split(bootstrapServers, ",")
 	config.Kafka.GroupID = getEnv("KAFKA_GROUP_ID", "analytics-consumer-group")
 	config.Kafka.Topic = getEnv("KAFKA_TOPIC", "execution.analytics")
+
+	// Security configuration for Azure Event Hub
 	config.Kafka.SecurityProtocol = getEnv("KAFKA_SECURITY_PROTOCOL", "PLAINTEXT")
+	config.Kafka.SaslMechanism = getEnv("KAFKA_SASL_MECHANISM", "PLAIN")
+
+	// Azure Event Hub connection configuration
+	// For Azure Event Hub, username is always "$ConnectionString"
+	config.Kafka.SaslUsername = getEnv("KAFKA_SASL_USERNAME", "$ConnectionString")
+
+	// Password is the full connection string for Azure Event Hub
+	config.Kafka.SaslPassword = getEnv("AZURE_EVENTHUB_CONNECTION_STRING", "")
+
+	// Azure Event Hub specific timeouts
+	config.Kafka.RequestTimeoutMs = getEnvAsInt("KAFKA_REQUEST_TIMEOUT_MS", 60000)
+	config.Kafka.SessionTimeoutMs = getEnvAsInt("KAFKA_SESSION_TIMEOUT_MS", 60000)
+	config.Kafka.EnableAutoCommit = getEnvAsBool("KAFKA_ENABLE_AUTO_COMMIT", true)
 
 	// Kafka User Registration configuration
 	config.KafkaUserRegistration.Topic = getEnv("KAFKA_USER_REGISTRATION_TOPIC", "iam.user.registered")
@@ -75,7 +98,20 @@ func Load() (*Config, error) {
 	// Service Discovery configuration
 	config.ServiceDiscovery.URL = getEnv("SERVICE_DISCOVERY_URL", "http://127.0.0.1:8761/eureka/")
 	config.ServiceDiscovery.ServiceName = getEnv("SERVICE_NAME", "analytics-service")
-	config.ServiceDiscovery.Enabled = getEnv("SERVICE_DISCOVERY_ENABLED", "false") == "true"
+	config.ServiceDiscovery.Enabled = getEnvAsBool("SERVICE_DISCOVERY_ENABLED", false)
+
+	// Log configuration (sin mostrar credenciales sensibles)
+	log.Printf("Kafka Configuration:")
+	log.Printf("  Bootstrap Servers: %v", config.Kafka.BootstrapServers)
+	log.Printf("  Security Protocol: %s", config.Kafka.SecurityProtocol)
+	log.Printf("  SASL Mechanism: %s", config.Kafka.SaslMechanism)
+	log.Printf("  Group ID: %s", config.Kafka.GroupID)
+	log.Printf("  Topic: %s", config.Kafka.Topic)
+	log.Printf("  User Registration Topic: %s", config.KafkaUserRegistration.Topic)
+
+	if config.Kafka.SecurityProtocol == "SASL_SSL" && config.Kafka.SaslPassword != "" {
+		log.Printf("  Azure Event Hub: Configured ✓")
+	}
 
 	return config, nil
 }
@@ -97,9 +133,43 @@ func (c *Config) GetServerAddress() string {
 	return fmt.Sprintf("%s:%s", c.Server.IP, c.Server.Port)
 }
 
+// IsSaslEnabled verifica si SASL está habilitado
+func (c *Config) IsSaslEnabled() bool {
+	return c.Kafka.SecurityProtocol == "SASL_SSL" || c.Kafka.SecurityProtocol == "SASL_PLAINTEXT"
+}
+
+// getEnv obtiene una variable de entorno o retorna un valor por defecto
 func getEnv(key, defaultValue string) string {
 	if value := os.Getenv(key); value != "" {
 		return value
 	}
 	return defaultValue
+}
+
+// getEnvAsInt obtiene una variable de entorno como entero o retorna un valor por defecto
+func getEnvAsInt(key string, defaultValue int) int {
+	valueStr := os.Getenv(key)
+	if valueStr == "" {
+		return defaultValue
+	}
+	value, err := strconv.Atoi(valueStr)
+	if err != nil {
+		log.Printf("Warning: Invalid integer value for %s, using default: %d", key, defaultValue)
+		return defaultValue
+	}
+	return value
+}
+
+// getEnvAsBool obtiene una variable de entorno como booleano o retorna un valor por defecto
+func getEnvAsBool(key string, defaultValue bool) bool {
+	valueStr := os.Getenv(key)
+	if valueStr == "" {
+		return defaultValue
+	}
+	value, err := strconv.ParseBool(valueStr)
+	if err != nil {
+		log.Printf("Warning: Invalid boolean value for %s, using default: %t", key, defaultValue)
+		return defaultValue
+	}
+	return value
 }

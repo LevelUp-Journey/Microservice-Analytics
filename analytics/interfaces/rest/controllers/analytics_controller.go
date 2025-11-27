@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"analytics/analytics/application/queryservices"
-	"analytics/analytics/domain/repositories"
+	"github.com/nanab/analytics-service/analytics/application/queryservices"
+	"github.com/nanab/analytics-service/analytics/domain/repositories"
 	"net/http"
 	"strconv"
 	"time"

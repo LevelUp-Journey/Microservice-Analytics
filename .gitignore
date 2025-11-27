@@ -25,6 +25,11 @@ vendor/
 .env
 .env.local
 .env.production
+.env.development
+.env.staging
+.env.*
+!.env.example
+!.env.azure
 
 # OS files
 .DS_Store

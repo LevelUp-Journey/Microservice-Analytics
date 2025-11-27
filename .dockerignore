@@ -1,0 +1,13 @@
+# Git version control files
+.git
+.gitignore
+
+# Docker files
+Dockerfile
+.dockerignore
+
+# Documentation
+docs/
+
+# Local development files
+*.env

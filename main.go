@@ -1,13 +1,6 @@
 package main
 
 import (
-	"analytics/analytics/application/commandservices"
-	"analytics/analytics/application/queryservices"
-	"analytics/analytics/infrastructure/config"
-	"analytics/analytics/infrastructure/messaging/kafka"
-	"analytics/analytics/infrastructure/persistence/postgres/repositories"
-	"analytics/analytics/interfaces/rest/controllers"
-	_ "analytics/docs"
 	"context"
 	"log"
 	"net/http"
@@ -15,6 +8,14 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/nanab/analytics-service/analytics/application/commandservices"
+	"github.com/nanab/analytics-service/analytics/application/queryservices"
+	"github.com/nanab/analytics-service/analytics/infrastructure/config"
+	"github.com/nanab/analytics-service/analytics/infrastructure/messaging/kafka"
+	"github.com/nanab/analytics-service/analytics/infrastructure/persistence/postgres/repositories"
+	"github.com/nanab/analytics-service/analytics/interfaces/rest/controllers"
+	_ "github.com/nanab/analytics-service/docs"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -71,6 +72,8 @@ func main() {
 		cfg.KafkaUserRegistration.Topic,
 		userRegistrationRepository,
 	)
+
+	log.Println("Services initialized successfully")
 
 	// Configurar Gin
 	router := gin.Default()
@@ -153,24 +156,42 @@ func main() {
 		}
 	}
 
-	// Iniciar consumidor de Kafka para ejecuciones de código
-	executionConsumer, err := kafka.NewConsumer(
-		cfg.Kafka.BootstrapServers,
-		cfg.Kafka.GroupID,
-		cfg.Kafka.Topic,
-		executionCommandService,
-	)
+	// Configurar consumidor de Kafka para ejecuciones de código con Azure Event Hub
+	executionConsumerConfig := &kafka.ConsumerConfig{
+		Brokers:          cfg.Kafka.BootstrapServers,
+		GroupID:          cfg.Kafka.GroupID,
+		Topic:            cfg.Kafka.Topic,
+		SecurityProtocol: cfg.Kafka.SecurityProtocol,
+		SaslMechanism:    cfg.Kafka.SaslMechanism,
+		SaslUsername:     cfg.Kafka.SaslUsername,
+		SaslPassword:     cfg.Kafka.SaslPassword,
+		RequestTimeoutMs: cfg.Kafka.RequestTimeoutMs,
+		SessionTimeoutMs: cfg.Kafka.SessionTimeoutMs,
+		EnableAutoCommit: cfg.Kafka.EnableAutoCommit,
+	}
+
+	log.Println("Creating execution analytics Kafka consumer...")
+	executionConsumer, err := kafka.NewConsumerWithConfig(executionConsumerConfig, executionCommandService)
 	if err != nil {
 		log.Fatalf("Failed to create execution Kafka consumer: %v", err)
 	}
 
-	// Iniciar consumidor de Kafka para registros de usuarios
-	userRegistrationConsumer, err := kafka.NewUserRegistrationConsumer(
-		cfg.Kafka.BootstrapServers,
-		cfg.KafkaUserRegistration.GroupID,
-		cfg.KafkaUserRegistration.Topic,
-		userRegistrationCommandService,
-	)
+	// Configurar consumidor de Kafka para registros de usuarios con Azure Event Hub
+	userRegistrationConsumerConfig := &kafka.ConsumerConfig{
+		Brokers:          cfg.Kafka.BootstrapServers,
+		GroupID:          cfg.KafkaUserRegistration.GroupID,
+		Topic:            cfg.KafkaUserRegistration.Topic,
+		SecurityProtocol: cfg.Kafka.SecurityProtocol,
+		SaslMechanism:    cfg.Kafka.SaslMechanism,
+		SaslUsername:     cfg.Kafka.SaslUsername,
+		SaslPassword:     cfg.Kafka.SaslPassword,
+		RequestTimeoutMs: cfg.Kafka.RequestTimeoutMs,
+		SessionTimeoutMs: cfg.Kafka.SessionTimeoutMs,
+		EnableAutoCommit: cfg.Kafka.EnableAutoCommit,
+	}
+
+	log.Println("Creating user registration Kafka consumer...")
+	userRegistrationConsumer, err := kafka.NewUserRegistrationConsumerWithConfig(userRegistrationConsumerConfig, userRegistrationCommandService)
 	if err != nil {
 		log.Fatalf("Failed to create user registration Kafka consumer: %v", err)
 	}

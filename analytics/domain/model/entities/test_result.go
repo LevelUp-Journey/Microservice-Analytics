@@ -1,7 +1,7 @@
 package entities
 
 import (
-	"analytics/analytics/domain/model/valueobjects"
+	"github.com/nanab/analytics-service/analytics/domain/model/valueobjects"
 )
 
 // TestResult representa el resultado de un test individual

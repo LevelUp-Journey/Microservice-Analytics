@@ -1,4 +1,4 @@
-module analytics
+module github.com/nanab/analytics-service
 
 go 1.23.3
 

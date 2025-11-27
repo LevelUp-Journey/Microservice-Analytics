@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"analytics/analytics/application/commandservices"
+	"github.com/nanab/analytics-service/analytics/application/commandservices"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

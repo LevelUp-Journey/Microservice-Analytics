@@ -1,10 +1,10 @@
 package controllers
 
 import (
-	"analytics/analytics/application/commandservices"
-	"analytics/analytics/application/queryservices"
-	"analytics/analytics/domain/model/aggregates"
-	"analytics/analytics/domain/model/valueobjects"
+	"github.com/nanab/analytics-service/analytics/application/commandservices"
+	"github.com/nanab/analytics-service/analytics/application/queryservices"
+	"github.com/nanab/analytics-service/analytics/domain/model/aggregates"
+	"github.com/nanab/analytics-service/analytics/domain/model/valueobjects"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

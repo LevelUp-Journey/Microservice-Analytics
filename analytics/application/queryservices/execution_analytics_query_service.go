@@ -1,9 +1,9 @@
 package queryservices
 
 import (
-	"analytics/analytics/domain/model/aggregates"
-	"analytics/analytics/domain/model/valueobjects"
-	"analytics/analytics/domain/repositories"
+	"github.com/nanab/analytics-service/analytics/domain/model/aggregates"
+	"github.com/nanab/analytics-service/analytics/domain/model/valueobjects"
+	"github.com/nanab/analytics-service/analytics/domain/repositories"
 	"context"
 	"fmt"
 	"time"

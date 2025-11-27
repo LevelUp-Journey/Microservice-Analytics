@@ -1,7 +1,7 @@
 package config
 
 import (
-	"analytics/analytics/infrastructure/persistence/postgres/repositories"
+	"github.com/nanab/analytics-service/analytics/infrastructure/persistence/postgres/repositories"
 	"fmt"
 	"log"
 

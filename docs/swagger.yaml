@@ -1,0 +1,9 @@
+basePath: /
+host: localhost:3000
+info:
+  contact: {}
+  description: Analytics microservice using Go Fiber
+  title: Microservice Analytics API
+  version: "1.0"
+paths: {}
+swagger: "2.0"

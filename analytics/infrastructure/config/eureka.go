@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"time"
 )
@@ -18,8 +19,27 @@ type EurekaClient struct {
 	port        string
 }
 
+// getOutboundIP obtiene la IP real de la máquina (no 0.0.0.0 o 127.0.0.1)
+func getOutboundIP() string {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		log.Printf("Warning: could not detect IP address: %v", err)
+		return "127.0.0.1"
+	}
+	defer conn.Close()
+
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+	return localAddr.IP.String()
+}
+
 // NewEurekaClient crea un nuevo cliente de Eureka
 func NewEurekaClient(serverURL, serviceName, ipAddr, port string) *EurekaClient {
+	// Si la IP configurada es 0.0.0.0, detectar la IP real
+	if ipAddr == "0.0.0.0" || ipAddr == "" {
+		ipAddr = getOutboundIP()
+		log.Printf("Auto-detected IP address for Eureka registration: %s", ipAddr)
+	}
+
 	instanceID := fmt.Sprintf("%s:%s:%s", serviceName, ipAddr, port)
 	return &EurekaClient{
 		serverURL:   serverURL,
@@ -45,9 +65,19 @@ func (c *EurekaClient) Register() error {
 				"$":        c.port,
 				"@enabled": "true",
 			},
-			"healthCheckUrl": fmt.Sprintf("http://%s:%s/health", c.ipAddr, c.port),
-			"statusPageUrl":  fmt.Sprintf("http://%s:%s/info", c.ipAddr, c.port),
-			"homePageUrl":    fmt.Sprintf("http://%s:%s/", c.ipAddr, c.port),
+			"healthCheckUrl":          fmt.Sprintf("http://%s:%s/health", c.ipAddr, c.port),
+			"statusPageUrl":           fmt.Sprintf("http://%s:%s/info", c.ipAddr, c.port),
+			"homePageUrl":             fmt.Sprintf("http://%s:%s/", c.ipAddr, c.port),
+			"vipAddress":              c.serviceName,
+			"secureVipAddress":        c.serviceName,
+			"isCoordinatingDiscoveryServer": "false",
+			"leaseInfo": map[string]interface{}{
+				"renewalIntervalInSecs": 10,
+				"durationInSecs":        30,
+			},
+			"metadata": map[string]interface{}{
+				"management.port": c.port,
+			},
 			"dataCenterInfo": map[string]interface{}{
 				"@class": "com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo",
 				"name":   "MyOwn",
@@ -107,14 +137,18 @@ func (c *EurekaClient) SendHeartbeat() error {
 
 // StartHeartbeat inicia el envío periódico de heartbeats
 func (c *EurekaClient) StartHeartbeat() {
-	ticker := time.NewTicker(30 * time.Second)
+	// Heartbeat cada 10 segundos (matching leaseInfo.renewalIntervalInSecs)
+	ticker := time.NewTicker(10 * time.Second)
 	go func() {
 		for range ticker.C {
 			if err := c.SendHeartbeat(); err != nil {
 				log.Printf("Heartbeat error: %v", err)
+			} else {
+				log.Printf("Heartbeat sent successfully for %s", c.instanceID)
 			}
 		}
 	}()
+	log.Printf("Started heartbeat for %s (every 10 seconds)", c.instanceID)
 }
 
 // Deregister elimina el registro del servicio de Eureka

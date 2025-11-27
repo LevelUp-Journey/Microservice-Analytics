@@ -9,7 +9,7 @@ definitions:
       message:
         type: string
     type: object
-host: 127.0.0.1:8291
+host: 100.102.208.55:8291
 info:
   contact:
     email: support@swagger.io
@@ -327,4 +327,7 @@ paths:
       summary: Sincronizar eventos de Kafka
       tags:
       - Sync
+schemes:
+- http
+- https
 swagger: "2.0"

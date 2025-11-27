@@ -1,4 +1,8 @@
 {
+    "schemes": [
+        "http",
+        "https"
+    ],
     "swagger": "2.0",
     "info": {
         "description": "Microservicio de análisis de ejecuciones de código con arquitectura DDD",
@@ -15,7 +19,7 @@
         },
         "version": "1.0"
     },
-    "host": "127.0.0.1:8291",
+    "host": "100.102.208.55:8291",
     "basePath": "/",
     "paths": {
         "/api/v1/analytics/challenge/{challengeId}": {

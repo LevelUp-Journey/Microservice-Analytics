@@ -491,9 +491,9 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "127.0.0.1:8291",
+	Host:             "100.102.208.55:8291",
 	BasePath:         "/",
-	Schemes:          []string{},
+	Schemes:          []string{"http", "https"},
 	Title:            "Analytics Microservice API",
 	Description:      "Microservicio de análisis de ejecuciones de código con arquitectura DDD",
 	InfoInstanceName: "swagger",

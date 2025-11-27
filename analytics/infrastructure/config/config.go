@@ -29,6 +29,10 @@ type Config struct {
 		Topic            string
 		SecurityProtocol string
 	}
+	KafkaUserRegistration struct {
+		Topic   string
+		GroupID string
+	}
 	ServiceDiscovery struct {
 		URL         string
 		ServiceName string
@@ -63,6 +67,10 @@ func Load() (*Config, error) {
 	config.Kafka.GroupID = getEnv("KAFKA_GROUP_ID", "analytics-consumer-group")
 	config.Kafka.Topic = getEnv("KAFKA_TOPIC", "execution.analytics")
 	config.Kafka.SecurityProtocol = getEnv("KAFKA_SECURITY_PROTOCOL", "PLAINTEXT")
+
+	// Kafka User Registration configuration
+	config.KafkaUserRegistration.Topic = getEnv("KAFKA_USER_REGISTRATION_TOPIC", "iam.user.registered")
+	config.KafkaUserRegistration.GroupID = getEnv("KAFKA_USER_REGISTRATION_GROUP_ID", "user-registration-analytics-group")
 
 	// Service Discovery configuration
 	config.ServiceDiscovery.URL = getEnv("SERVICE_DISCOVERY_URL", "http://127.0.0.1:8761/eureka/")

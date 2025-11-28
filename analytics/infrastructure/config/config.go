@@ -87,7 +87,7 @@ func Load() (*Config, error) {
 	config.Kafka.SaslUsername = getEnv("KAFKA_SASL_USERNAME", "$ConnectionString")
 
 	// Password is the full connection string for Azure Event Hub
-	config.Kafka.SaslPassword = getEnv("AZURE_EVENTHUB_CONNECTION_STRING", "")
+	config.Kafka.SaslPassword = getEnv("KAFKA_SASL_PASSWORD", "")
 
 	// Azure Event Hub specific timeouts
 	config.Kafka.RequestTimeoutMs = getEnvAsInt("KAFKA_REQUEST_TIMEOUT_MS", 60000)

@@ -13,8 +13,9 @@ import (
 // Config almacena toda la configuración de la aplicación
 type Config struct {
 	Server struct {
-		Port string
-		IP   string
+		Port     string
+		IP       string
+		Hostname string // Hostname o IP pública para registro en Eureka
 	}
 	Database struct {
 		Host     string
@@ -45,6 +46,7 @@ type Config struct {
 		URL         string
 		ServiceName string
 		Enabled     bool
+		InstanceIP  string // IP específica para registro en Eureka (opcional)
 	}
 }
 
@@ -60,6 +62,7 @@ func Load() (*Config, error) {
 	// Server configuration
 	config.Server.Port = getEnv("SERVER_PORT", "8080")
 	config.Server.IP = getEnv("SERVER_IP", "127.0.0.1")
+	config.Server.Hostname = getEnv("SERVER_HOSTNAME", "") // Hostname público para Eureka
 
 	// Database configuration
 	config.Database.Host = getEnv("DB_HOST", "localhost")
@@ -99,6 +102,7 @@ func Load() (*Config, error) {
 	config.ServiceDiscovery.URL = getEnv("SERVICE_DISCOVERY_URL", "http://127.0.0.1:8761/eureka/")
 	config.ServiceDiscovery.ServiceName = getEnv("SERVICE_NAME", "analytics-service")
 	config.ServiceDiscovery.Enabled = getEnvAsBool("SERVICE_DISCOVERY_ENABLED", false)
+	config.ServiceDiscovery.InstanceIP = getEnv("EUREKA_INSTANCE_IP", "") // IP para registro en Eureka
 
 	// Log configuration (sin mostrar credenciales sensibles)
 	log.Printf("Kafka Configuration:")

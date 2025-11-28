@@ -33,19 +33,22 @@ func getOutboundIP() string {
 }
 
 // NewEurekaClient crea un nuevo cliente de Eureka
-func NewEurekaClient(serverURL, serviceName, ipAddr, port string) *EurekaClient {
-	// Si la IP configurada es 0.0.0.0, detectar la IP real
-	if ipAddr == "0.0.0.0" || ipAddr == "" {
-		ipAddr = getOutboundIP()
-		log.Printf("Auto-detected IP address for Eureka registration: %s", ipAddr)
+// Si instanceIP está vacío, detecta automáticamente la IP
+func NewEurekaClient(serverURL, serviceName, instanceIP, port string) *EurekaClient {
+	// Si la IP no está configurada o es 0.0.0.0, detectar la IP real
+	if instanceIP == "" || instanceIP == "0.0.0.0" {
+		instanceIP = getOutboundIP()
+		log.Printf("Auto-detected IP address for Eureka registration: %s", instanceIP)
+	} else {
+		log.Printf("Using configured IP address for Eureka registration: %s", instanceIP)
 	}
 
-	instanceID := fmt.Sprintf("%s:%s:%s", serviceName, ipAddr, port)
+	instanceID := fmt.Sprintf("%s:%s:%s", serviceName, instanceIP, port)
 	return &EurekaClient{
 		serverURL:   serverURL,
 		serviceName: serviceName,
 		instanceID:  instanceID,
-		ipAddr:      ipAddr,
+		ipAddr:      instanceIP,
 		port:        port,
 	}
 }
@@ -65,11 +68,11 @@ func (c *EurekaClient) Register() error {
 				"$":        c.port,
 				"@enabled": "true",
 			},
-			"healthCheckUrl":          fmt.Sprintf("http://%s:%s/health", c.ipAddr, c.port),
-			"statusPageUrl":           fmt.Sprintf("http://%s:%s/info", c.ipAddr, c.port),
-			"homePageUrl":             fmt.Sprintf("http://%s:%s/", c.ipAddr, c.port),
-			"vipAddress":              c.serviceName,
-			"secureVipAddress":        c.serviceName,
+			"healthCheckUrl":                fmt.Sprintf("http://%s:%s/health", c.ipAddr, c.port),
+			"statusPageUrl":                 fmt.Sprintf("http://%s:%s/info", c.ipAddr, c.port),
+			"homePageUrl":                   fmt.Sprintf("http://%s:%s/", c.ipAddr, c.port),
+			"vipAddress":                    c.serviceName,
+			"secureVipAddress":              c.serviceName,
 			"isCoordinatingDiscoveryServer": "false",
 			"leaseInfo": map[string]interface{}{
 				"renewalIntervalInSecs": 10,

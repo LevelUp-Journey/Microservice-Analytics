@@ -142,10 +142,17 @@ func main() {
 	// Registrar con Eureka si está habilitado
 	var eurekaClient *config.EurekaClient
 	if cfg.ServiceDiscovery.Enabled {
+		// Usar EUREKA_INSTANCE_IP si está configurado, sino hostname, sino detectar automáticamente
+		instanceIP := cfg.ServiceDiscovery.InstanceIP
+		if instanceIP == "" && cfg.Server.Hostname != "" {
+			instanceIP = cfg.Server.Hostname
+		}
+		// Si instanceIP sigue vacío o es 0.0.0.0, NewEurekaClient detectará automáticamente
+
 		eurekaClient = config.NewEurekaClient(
 			cfg.ServiceDiscovery.URL,
 			cfg.ServiceDiscovery.ServiceName,
-			cfg.Server.IP,
+			instanceIP,
 			cfg.Server.Port,
 		)
 

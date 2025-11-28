@@ -203,7 +203,46 @@ KAFKA_ENABLE_AUTO_COMMIT=true
 SERVICE_DISCOVERY_URL=https://YOUR-EUREKA-SERVER/eureka/
 SERVICE_NAME=analytics-service
 SERVICE_DISCOVERY_ENABLED=true
+
+# IP/Hostname para registro en Eureka
+# El servidor siempre escucha en SERVER_IP (0.0.0.0)
+# Pero Eureka registra EUREKA_INSTANCE_IP o SERVER_HOSTNAME para que otros servicios se conecten
+SERVER_HOSTNAME=your-service.azurecontainerapps.io  # Hostname público (opcional)
+EUREKA_INSTANCE_IP=  # IP pública específica (opcional, tiene prioridad sobre hostname)
 ```
+
+### 📘 Configuración de IP Pública para Eureka
+
+**Importante:** El microservicio separa dos configuraciones:
+
+1. **SERVER_IP** (`0.0.0.0`) - Interfaz donde el servidor HTTP escucha
+2. **EUREKA_INSTANCE_IP** o **SERVER_HOSTNAME** - IP/hostname que otros servicios usan para conectarse
+
+**Escenarios comunes:**
+
+```bash
+# Desarrollo Local (auto-detecta IP local)
+SERVER_IP=0.0.0.0
+EUREKA_INSTANCE_IP=
+# Resultado: Registra 192.168.0.56:8080
+
+# Producción con IP Pública
+SERVER_IP=0.0.0.0
+EUREKA_INSTANCE_IP=203.0.113.10
+# Resultado: Registra 203.0.113.10:8080
+
+# Azure/Cloud con Hostname
+SERVER_IP=0.0.0.0
+SERVER_HOSTNAME=analytics.azurecontainerapps.io
+# Resultado: Registra analytics.azurecontainerapps.io:8080
+```
+
+**Orden de prioridad:**
+1. `EUREKA_INSTANCE_IP` (si está configurada)
+2. `SERVER_HOSTNAME` (si EUREKA_INSTANCE_IP está vacía)
+3. Auto-detección (si ambas están vacías)
+
+Para más detalles, consulta: [docs/EUREKA_CONFIGURATION.md](docs/EUREKA_CONFIGURATION.md)
 
 ### 📘 Configuración de Azure Event Hub
 
